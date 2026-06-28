@@ -8,7 +8,7 @@
 
 **PixelSlicer** is a tactile digital utility for cutting, tweaking, and exporting pixel art sprite sheets into high-fidelity animated GIFs or game-ready sprite atlases. Built with a rich **Modern Folk Art** design system, the app wraps advanced canvas slicing capabilities in a woven fabric interface with realistic wooden buttons, page transitions, and physical sound-effect synthesis.
 
-🎯 **Live Demo**: [pixelslicer.vercel.app](https://pixelslicer.vercel.app)
+🎯 **Live Demo**: [pixelslicerr.vercel.app](https://pixelslicerr.vercel.app)
 
 ![PixelSlicer Interface Landing Page](public/screenshot_landing.png)
 
