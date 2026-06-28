@@ -833,97 +833,130 @@ export default function App() {
     }
   };
 
+  const handleWindowMouseMove = useCallback((e) => {
+    if (!dragState.current.isDragging) return;
+    if (!image || !canvasRef.current) return;
+    
+    const rect = canvasRef.current.getBoundingClientRect();
+    const mx = e.clientX - rect.left;
+    const my = e.clientY - rect.top;
+    
+    const x = (mx - pan.x) / zoom;
+    const y = (my - pan.y) / zoom;
+    
+    const { action } = dragState.current;
+    
+    if (action.type === 'pan') {
+      const dx = e.clientX - dragState.current.startX;
+      const dy = e.clientY - dragState.current.startY;
+      setPan({
+        x: dragState.current.startPanX + dx,
+        y: dragState.current.startPanY + dy
+      });
+      return;
+    }
+    
+    const newSlices = [...slices];
+    const idx = newSlices.findIndex(s => s.id === action.id);
+    if (idx === -1) return;
+    const s = { ...newSlices[idx] };
+    
+    if (action.type === 'move') {
+      s.x = Math.max(0, Math.min(image.width - s.w, Math.round(x - action.offsetX)));
+      s.y = Math.max(0, Math.min(image.height - s.h, Math.round(y - action.offsetY)));
+    } else if (action.type === 'draw') {
+      const startX = action.startX;
+      const startY = action.startY;
+      s.x = Math.max(0, Math.min(image.width, Math.round(Math.min(startX, x))));
+      s.y = Math.max(0, Math.min(image.height, Math.round(Math.min(startY, y))));
+      s.w = Math.max(1, Math.min(image.width - s.x, Math.round(Math.abs(x - startX))));
+      s.h = Math.max(1, Math.min(image.height - s.y, Math.round(Math.abs(y - startY))));
+    } else {
+      // Multi-direction resizes
+      const x2 = s.x + s.w;
+      const y2 = s.y + s.h;
+      
+      if (action.type.includes('L')) {
+        const val = Math.max(0, Math.min(x2 - 1, Math.round(x)));
+        s.x = val;
+        s.w = x2 - val;
+      }
+      if (action.type.includes('R')) {
+        s.w = Math.max(1, Math.min(image.width - s.x, Math.round(x - s.x)));
+      }
+      if (action.type.includes('T')) {
+        const val = Math.max(0, Math.min(y2 - 1, Math.round(y)));
+        s.y = val;
+        s.h = y2 - val;
+      }
+      if (action.type.includes('B')) {
+        s.h = Math.max(1, Math.min(image.height - s.y, Math.round(y - s.y)));
+      }
+    }
+    
+    newSlices[idx] = s;
+    setSlices(newSlices);
+  }, [image, pan, zoom, slices]);
+
+  const handleWindowMouseUp = useCallback(() => {
+    if (!dragState.current.isDragging) return;
+    
+    if (dragState.current.action.type === 'draw') {
+      const targetId = dragState.current.action.id;
+      setSlices(prev => {
+        const drawn = prev.find(s => s.id === targetId);
+        if (drawn && (drawn.w < 3 || drawn.h < 3)) {
+          setActiveSliceId(prev[prev.length - 2]?.id || null);
+          return prev.filter(s => s.id !== targetId);
+        }
+        return prev;
+      });
+    }
+    dragState.current = { isDragging: false, action: null };
+    if (canvasRef.current && !isSpacePressed.current) {
+      canvasRef.current.style.cursor = 'default';
+    }
+  }, []);
+
+  // Window events mounting
+  useEffect(() => {
+    window.addEventListener('mousemove', handleWindowMouseMove);
+    window.addEventListener('mouseup', handleWindowMouseUp);
+    return () => {
+      window.removeEventListener('mousemove', handleWindowMouseMove);
+      window.removeEventListener('mouseup', handleWindowMouseUp);
+    };
+  }, [handleWindowMouseMove, handleWindowMouseUp]);
+
   const handleMouseMove = (e) => {
     if (!image) return;
+    if (dragState.current.isDragging) return;
+    
     const { x, y } = getMousePos(e);
     
-    if (!dragState.current.isDragging) {
-      // Hover effects
-      if (isSpacePressed.current) {
-        canvasRef.current.style.cursor = 'grab';
-        return;
-      }
-      const hit = detectHit(x, y);
-      if (!hit) {
-        canvasRef.current.style.cursor = 'default';
-      } else if (['resizeTL', 'resizeBR'].includes(hit.type)) {
-        canvasRef.current.style.cursor = 'nwse-resize';
-      } else if (['resizeTR', 'resizeBL'].includes(hit.type)) {
-        canvasRef.current.style.cursor = 'nesw-resize';
-      } else if (['resizeL', 'resizeR'].includes(hit.type)) {
-        canvasRef.current.style.cursor = 'ew-resize';
-      } else if (['resizeT', 'resizeB'].includes(hit.type)) {
-        canvasRef.current.style.cursor = 'ns-resize';
-      } else if (hit.type === 'select') {
-        canvasRef.current.style.cursor = 'move';
-      }
-    } else {
-      const { action } = dragState.current;
-      
-      if (action.type === 'pan') {
-        const dx = e.clientX - dragState.current.startX;
-        const dy = e.clientY - dragState.current.startY;
-        setPan({
-          x: dragState.current.startPanX + dx,
-          y: dragState.current.startPanY + dy
-        });
-        return;
-      }
-      
-      const newSlices = [...slices];
-      const idx = newSlices.findIndex(s => s.id === action.id);
-      if (idx === -1) return;
-      const s = { ...newSlices[idx] };
-      
-      if (action.type === 'move') {
-        s.x = Math.max(0, Math.min(image.width - s.w, Math.round(x - action.offsetX)));
-        s.y = Math.max(0, Math.min(image.height - s.h, Math.round(y - action.offsetY)));
-      } else if (action.type === 'draw') {
-        const startX = action.startX;
-        const startY = action.startY;
-        s.x = Math.max(0, Math.min(image.width, Math.round(Math.min(startX, x))));
-        s.y = Math.max(0, Math.min(image.height, Math.round(Math.min(startY, y))));
-        s.w = Math.max(1, Math.min(image.width - s.x, Math.round(Math.abs(x - startX))));
-        s.h = Math.max(1, Math.min(image.height - s.y, Math.round(Math.abs(y - startY))));
-      } else {
-        // Multi-direction resizes
-        const x2 = s.x + s.w;
-        const y2 = s.y + s.h;
-        
-        if (action.type.includes('L')) {
-          const val = Math.max(0, Math.min(x2 - 1, Math.round(x)));
-          s.x = val;
-          s.w = x2 - val;
-        }
-        if (action.type.includes('R')) {
-          s.w = Math.max(1, Math.min(image.width - s.x, Math.round(x - s.x)));
-        }
-        if (action.type.includes('T')) {
-          const val = Math.max(0, Math.min(y2 - 1, Math.round(y)));
-          s.y = val;
-          s.h = y2 - val;
-        }
-        if (action.type.includes('B')) {
-          s.h = Math.max(1, Math.min(image.height - s.y, Math.round(y - s.y)));
-        }
-      }
-      
-      newSlices[idx] = s;
-      setSlices(newSlices);
+    // Hover effects cursor updates
+    if (isSpacePressed.current) {
+      canvasRef.current.style.cursor = 'grab';
+      return;
+    }
+    const hit = detectHit(x, y);
+    if (!hit) {
+      canvasRef.current.style.cursor = 'default';
+    } else if (['resizeTL', 'resizeBR'].includes(hit.type)) {
+      canvasRef.current.style.cursor = 'nwse-resize';
+    } else if (['resizeTR', 'resizeBL'].includes(hit.type)) {
+      canvasRef.current.style.cursor = 'nesw-resize';
+    } else if (['resizeL', 'resizeR'].includes(hit.type)) {
+      canvasRef.current.style.cursor = 'ew-resize';
+    } else if (['resizeT', 'resizeB'].includes(hit.type)) {
+      canvasRef.current.style.cursor = 'ns-resize';
+    } else if (hit.type === 'select') {
+      canvasRef.current.style.cursor = 'move';
     }
   };
 
   const handleMouseUp = () => {
-    if (dragState.current.isDragging && dragState.current.action.type === 'draw') {
-      const targetId = dragState.current.action.id;
-      const drawn = slices.find(s => s.id === targetId);
-      // Clean up small click nodes
-      if (drawn && (drawn.w < 3 || drawn.h < 3)) {
-        setSlices(prev => prev.filter(s => s.id !== targetId));
-        setActiveSliceId(slices[slices.length - 2]?.id || null);
-      }
-    }
-    dragState.current = { isDragging: false, action: null };
+    handleWindowMouseUp();
   };
 
   const handleMouseLeave = () => {
