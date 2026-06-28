@@ -4,8 +4,11 @@
 [![React](https://img.shields.io/badge/React-v19.2.7-61DAFB?style=for-the-badge&logo=react)](https://react.dev/)
 [![Tailwind CSS v4](https://img.shields.io/badge/Tailwind_CSS_v4-38BDF8?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com/)
 [![License](https://img.shields.io/badge/License-MIT-success?style=for-the-badge)](LICENSE)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/Moha2005269/pixelslicer)
 
 **PixelSlicer** is a tactile digital utility for cutting, tweaking, and exporting pixel art sprite sheets into high-fidelity animated GIFs or game-ready sprite atlases. Built with a rich **Modern Folk Art** design system, the app wraps advanced canvas slicing capabilities in a woven fabric interface with realistic wooden buttons, page transitions, and physical sound-effect synthesis.
+
+🎯 **Live Demo**: [pixelslicer.vercel.app](https://pixelslicer.vercel.app)
 
 ![PixelSlicer Interface Landing Page](public/screenshot_landing.png)
 
