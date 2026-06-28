@@ -1,0 +1,357 @@
+@import url('https://fonts.googleapis.com/css2?family=Fredericka+the+Great&family=Nunito:wght@600;700;800&family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap');
+
+@import "tailwindcss";
+
+/* Reset base variables & default fonts */
+:root {
+  font-family: 'Nunito', sans-serif;
+  color: #3e3a35;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #f4f0e6;
+}
+
+/* Authentic Woven Fabric Background */
+.bg-fabric {
+  background-color: #f4f0e6;
+  background-image: 
+    url("https://www.transparenttextures.com/patterns/woven-light.png"),
+    radial-gradient(#d1cbb8 1px, transparent 1px);
+  background-size: auto, 8px 8px;
+  animation: scrollFabric 80s linear infinite;
+  min-height: 100vh;
+}
+
+@keyframes scrollFabric {
+  0% { background-position: 0px 0px, 0px 0px; }
+  100% { background-position: 400px 400px, 120px 120px; }
+}
+
+/* Swinging Animation for Header */
+@keyframes swing {
+  0%, 100% { transform: rotate(-1.5deg) translateY(0); }
+  50% { transform: rotate(1.5deg) translateY(-6px); }
+}
+
+.swing-element {
+  animation: swing 6s ease-in-out infinite;
+  transform-origin: top center;
+}
+
+.title-font {
+  font-family: 'Fredericka the Great', cursive;
+  color: #a53030;
+  text-shadow: 2px 2px 0px rgba(0,0,0,0.1), -1px -1px 0px rgba(255,255,255,0.8);
+  letter-spacing: 3px;
+}
+
+.title-dark { color: #2d2a26; }
+
+/* Realistic Ribbon with Pins */
+.ribbon-container {
+  position: relative;
+  display: inline-block;
+}
+.pin {
+  position: absolute;
+  top: -5px;
+  width: 14px;
+  height: 14px;
+  background: radial-gradient(circle at 4px 4px, #ffffff, #cbd5e1, #64748b);
+  border-radius: 50%;
+  box-shadow: 2px 3px 5px rgba(0,0,0,0.35);
+  z-index: 10;
+}
+.pin-left { left: 15px; }
+.pin-right { right: 15px; }
+
+.ribbon {
+  position: relative;
+  background: url("https://www.transparenttextures.com/patterns/cream-paper.png") #e2d8c3;
+  color: #5c4a3d;
+  padding: 10px 40px;
+  font-weight: 800;
+  font-size: 1.15rem;
+  box-shadow: 0 5px 12px rgba(0,0,0,0.15);
+  border-radius: 2px;
+}
+.ribbon::before, .ribbon::after {
+  content: '';
+  position: absolute;
+  top: 6px;
+  bottom: -6px;
+  width: 25px;
+  background: url("https://www.transparenttextures.com/patterns/cream-paper.png") #c9c0ac;
+  z-index: -1;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.25);
+}
+.ribbon::before {
+  left: -15px;
+  clip-path: polygon(100% 0, 100% 100%, 0 100%, 100% 50%, 0 0);
+}
+.ribbon::after {
+  right: -15px;
+  clip-path: polygon(0 0, 0 100%, 100% 100%, 0 50%, 100% 0);
+}
+.ribbon-stitch {
+  position: absolute;
+  top: 4px; left: 0; right: 0; bottom: 4px;
+  border-top: 2px dashed rgba(164, 120, 84, 0.6);
+  border-bottom: 2px dashed rgba(164, 120, 84, 0.6);
+  pointer-events: none;
+}
+
+/* Textured Patches */
+.patch-container {
+  position: relative;
+  border-radius: 16px;
+  padding: 1.75rem;
+  box-shadow: 
+    3px 6px 18px rgba(0,0,0,0.12), 
+    inset 0 0 24px rgba(255,255,255,0.7);
+  background-blend-mode: multiply;
+}
+.patch-left { 
+  background: url("https://www.transparenttextures.com/patterns/linen.png") #f0e3cc; 
+  border: 3px solid #a67c52; 
+}
+.patch-right { 
+  background: url("https://www.transparenttextures.com/patterns/linen.png") #e2e5cd; 
+  border: 3px solid #7d9169; 
+}
+.patch-accent {
+  background: url("https://www.transparenttextures.com/patterns/linen.png") #eeddc5; 
+  border: 3px solid #b35656; 
+}
+
+.patch-stitch {
+  position: absolute;
+  top: 8px; left: 8px; right: 8px; bottom: 8px;
+  border-radius: 10px;
+  pointer-events: none;
+}
+.patch-left > .patch-stitch { border: 2px dashed #8b5a2b; opacity: 0.65; }
+.patch-right > .patch-stitch { border: 2px dashed #557a46; opacity: 0.65; }
+.patch-accent > .patch-stitch { border: 2px dashed #a53030; opacity: 0.65; }
+
+/* Marching Ants Animation for Dragging */
+@keyframes marchingAnts {
+  0% { background-position: 0 0, 100% 0, 0 100%, 0 0; }
+  100% { background-position: 20px 0, 100% 20px, -20px 100%, 0 -20px; }
+}
+
+.upload-box {
+  position: relative;
+  background-color: rgba(246, 236, 225, 0.8);
+  border-radius: 12px;
+  text-align: center;
+  padding: 1.5rem;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  background-image: 
+    linear-gradient(90deg, #c45454 50%, transparent 50%),
+    linear-gradient(90deg, #c45454 50%, transparent 50%),
+    linear-gradient(0deg, #c45454 50%, transparent 50%),
+    linear-gradient(0deg, #c45454 50%, transparent 50%);
+  background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
+  background-size: 15px 3px, 15px 3px, 3px 15px, 3px 15px;
+  background-position: 0 0, 100% 100%, 0 100%, 100% 0;
+}
+.upload-box:hover, .upload-box.active { 
+  background-color: rgba(253, 245, 234, 1); 
+  transform: scale(1.02) translateY(-2px);
+  animation: marchingAnts 1s linear infinite;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+}
+.upload-box.active {
+  background-color: #fceceb;
+}
+
+/* Paper Tag Inputs */
+.input-tag-container {
+  position: relative;
+  background: #fdfbf7;
+  border: 1px solid #d4c0a8;
+  border-radius: 4px 12px 12px 4px;
+  padding: 2px;
+  box-shadow: inset 1px 1px 4px rgba(0,0,0,0.06), 1px 2px 4px rgba(0,0,0,0.05);
+  display: flex;
+  align-items: center;
+}
+.input-tag-hole {
+  width: 7px;
+  height: 7px;
+  background: #a67c52;
+  border-radius: 50%;
+  margin-left: 6px;
+  box-shadow: inset 1px 1px 2px rgba(0,0,0,0.5);
+}
+.input-stitched {
+  background: transparent;
+  border: none;
+  padding: 6px 8px 6px 12px;
+  width: 100%;
+  outline: none;
+  font-family: 'Courier Prime', monospace;
+  font-weight: bold;
+  color: #4a2c11;
+  font-size: 1.05rem;
+}
+
+/* Real Wood Buttons */
+.btn-wood {
+  background: url("https://www.transparenttextures.com/patterns/wood-pattern.png"), linear-gradient(to bottom, #d4a373 0%, #b87c4c 100%);
+  border: 2px solid #4a2c11;
+  border-radius: 12px;
+  color: #fff;
+  font-weight: 800;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.6);
+  box-shadow: 
+    inset 0 2px 4px rgba(255,255,255,0.35),
+    0 6px 0 #5c3a21, 
+    0 8px 10px rgba(0,0,0,0.45);
+  position: relative;
+  transition: all 0.1s;
+  font-family: 'Nunito', sans-serif;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.btn-wood:active:not(:disabled) {
+  top: 5px;
+  box-shadow: 
+    inset 0 2px 4px rgba(255,255,255,0.3),
+    0 1px 0 #5c3a21, 
+    0 2px 4px rgba(0,0,0,0.35);
+}
+.btn-wood:disabled {
+  filter: grayscale(85%) opacity(0.65);
+  cursor: not-allowed;
+  top: 5px;
+  box-shadow: 0 1px 0 #5c3a21;
+}
+.btn-wood-inner {
+  border: 2px dashed rgba(255,255,255,0.4);
+  border-radius: 8px;
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-small {
+  background: url("https://www.transparenttextures.com/patterns/cream-paper.png") #fdfbf7;
+  border: 2px solid #a67c52;
+  border-radius: 8px;
+  color: #5c4a3d;
+  font-weight: 700;
+  padding: 6px 12px;
+  box-shadow: 1px 2px 4px rgba(0,0,0,0.1);
+  transition: all 0.2s;
+  cursor: pointer;
+}
+.btn-small:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 2px 3px 6px rgba(0,0,0,0.15);
+  background-color: #ffffff;
+}
+.btn-small:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow: 0px 1px 2px rgba(0,0,0,0.1);
+}
+
+/* Axe Animation */
+@keyframes chop {
+  0% { transform: rotate(-45deg) scale(1.1); }
+  45% { transform: rotate(25deg) scale(1.1); }
+  100% { transform: rotate(-45deg) scale(1.1); }
+}
+.axe-chop {
+  animation: chop 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* Embroidered Icon Styling */
+.icon-embroidered {
+  filter: drop-shadow(1px 1px 0px rgba(0,0,0,0.25));
+}
+
+/* Tutorial Modal Styles */
+.tutorial-overlay {
+  background: rgba(45, 42, 38, 0.75);
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.3s ease-out forwards;
+}
+.tutorial-content {
+  animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  max-width: 620px;
+  width: 100%;
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes popIn {
+  from { opacity: 0; transform: scale(0.9) translateY(25px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+.prompt-box {
+  background: #2d2a26;
+  color: #e2d8c3;
+  font-family: 'Courier Prime', monospace;
+  border: 2px solid #5c4a3d;
+  border-radius: 8px;
+  padding: 0.85rem;
+  position: relative;
+  box-shadow: inset 0 0 12px rgba(0,0,0,0.65);
+}
+
+.preview-box {
+  background: url("https://www.transparenttextures.com/patterns/cream-paper.png") #fcfaf5;
+  border: 3px solid #8c9e78;
+  border-radius: 12px;
+  position: relative;
+  box-shadow: inset 0 0 24px rgba(0,0,0,0.12);
+}
+.preview-stitch {
+  position: absolute;
+  top: 6px; left: 6px; right: 6px; bottom: 6px;
+  border: 2px dashed #7d9169;
+  border-radius: 8px;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* Pixel rendering styling */
+.pixelated {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+/* Checkbox & Radio inputs customized to look embroidered/wood-inspired */
+.wood-checkbox {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border: 2px solid #4a2c11;
+  background: #fdfbf7;
+  border-radius: 4px;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s;
+}
+.wood-checkbox:checked {
+  background: #a53030;
+}
+.wood-checkbox:checked::after {
+  content: "✓";
+  position: absolute;
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+  top: -2px;
+  left: 2px;
+}
