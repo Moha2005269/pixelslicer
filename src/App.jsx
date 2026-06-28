@@ -299,20 +299,69 @@ export default function App() {
     const w = image.width;
     const h = image.height;
     
+    // --- Step 1: Detect background color ---
+    // Sample pixels from the four corners to determine the most common background color.
+    const getPixel = (px, py) => {
+      const i = (py * w + px) * 4;
+      return [data[i], data[i+1], data[i+2], data[i+3]];
+    };
+    
+    const cornerSamples = [
+      getPixel(0, 0),
+      getPixel(w - 1, 0),
+      getPixel(0, h - 1),
+      getPixel(w - 1, h - 1),
+      // Also sample a few pixels inward in case corners are clipped
+      getPixel(Math.min(1, w - 1), 0),
+      getPixel(0, Math.min(1, h - 1)),
+    ];
+    
+    // Find most common corner color
+    const colorKey = (c) => `${c[0]},${c[1]},${c[2]},${c[3]}`;
+    const colorCounts = {};
+    cornerSamples.forEach(c => {
+      const k = colorKey(c);
+      colorCounts[k] = (colorCounts[k] || 0) + 1;
+    });
+    
+    let bgColorKey = null;
+    let bgCount = 0;
+    for (const [k, count] of Object.entries(colorCounts)) {
+      if (count > bgCount) { bgCount = count; bgColorKey = k; }
+    }
+    
+    const bgColor = bgColorKey ? bgColorKey.split(',').map(Number) : [0, 0, 0, 0];
+    const bgIsTransparent = bgColor[3] < 16;
+    
+    // Color distance tolerance for background matching
+    const tolerance = 30;
+    
+    const isBackground = (x, y) => {
+      if (x < 0 || x >= w || y < 0 || y >= h) return true;
+      const idx = (y * w + x) * 4;
+      const a = data[idx + 3];
+      
+      // Fully transparent pixels are always background
+      if (a < 8) return true;
+      
+      // If the detected background is transparent, only alpha matters
+      if (bgIsTransparent) return a < 16;
+      
+      // Otherwise compare RGB distance to background color
+      const dr = data[idx] - bgColor[0];
+      const dg = data[idx + 1] - bgColor[1];
+      const db = data[idx + 2] - bgColor[2];
+      return (dr * dr + dg * dg + db * db) < (tolerance * tolerance);
+    };
+    
     const visited = new Uint8Array(w * h);
     const rects = [];
     
-    const isOpaque = (x, y) => {
-      if (x < 0 || x >= w || y < 0 || y >= h) return false;
-      const idx = (y * w + x) * 4;
-      return data[idx + 3] > 8; // Alpha cutoff threshold
-    };
-    
-    // Scan all pixels for opaque zones
+    // Scan all pixels for foreground zones
     for (let y = 0; y < h; y++) {
       for (let x = 0; x < w; x++) {
         const idx = y * w + x;
-        if (visited[idx] === 0 && isOpaque(x, y)) {
+        if (visited[idx] === 0 && !isBackground(x, y)) {
           // Connected Component Search (BFS)
           let minX = x, maxX = x, minY = y, maxY = y;
           const queue = [x, y];
@@ -334,7 +383,7 @@ export default function App() {
               const ny = cy + dirs[d+1];
               if (nx >= 0 && nx < w && ny >= 0 && ny < h) {
                 const nIdx = ny * w + nx;
-                if (visited[nIdx] === 0 && isOpaque(nx, ny)) {
+                if (visited[nIdx] === 0 && !isBackground(nx, ny)) {
                   visited[nIdx] = 1;
                   queue.push(nx, ny);
                   if (nx < minX) minX = nx;
@@ -346,10 +395,10 @@ export default function App() {
             }
           }
           
-          // Filter out tiny artifacts (anything smaller than 2x2)
+          // Filter out tiny artifacts (anything smaller than 4x4)
           const sw = maxX - minX + 1;
           const sh = maxY - minY + 1;
-          if (sw >= 2 && sh >= 2) {
+          if (sw >= 4 && sh >= 4) {
             rects.push({ x: minX, y: minY, w: sw, h: sh });
           }
         }
@@ -402,6 +451,14 @@ export default function App() {
       merged = nextList;
     }
     
+    // Sort left-to-right, top-to-bottom
+    merged.sort((a, b) => {
+      const rowA = Math.floor(a.y / 20);
+      const rowB = Math.floor(b.y / 20);
+      if (rowA !== rowB) return rowA - rowB;
+      return a.x - b.x;
+    });
+    
     // Map bounding boxes to states
     const finalSlices = merged.map((rect, idx) => ({
       id: `auto_${idx}_${Date.now()}`,
@@ -412,6 +469,11 @@ export default function App() {
       h: rect.h,
       delay: frameDelay
     }));
+    
+    if (finalSlices.length === 0) {
+      alert("No sprites detected. The image may have a complex background. Try using the Grid Slicer instead.");
+      return;
+    }
     
     setSlices(finalSlices);
     if (finalSlices.length > 0) {
